@@ -1,3 +1,5 @@
+
+
 from Widgets import *
 
 from XJ.Structs.XJQ_PictLoader import XJQ_PictLoader
@@ -5,7 +7,7 @@ from XJ.Widgets.XJQ_PictCarousel import XJQ_PictCarousel
 from XJ.Widgets.XJQ_LoadingMask import XJQ_LoadingMask
 
 from PyQt5.QtWidgets import QWidget,QApplication,QHBoxLayout
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap,QIcon
 
 class Main(QWidget):
 	config={
@@ -16,7 +18,7 @@ class Main(QWidget):
 		super().__init__()
 		self.__oui=OperationUI()
 		self.__sui=SavingUI()
-		self.__pc=XJQ_PictCarousel()
+		self.__pc=XJQ_PictCarousel(iconPlay='./Icons/播放.png',iconPause='./Icons/暂停.png')
 		self.__pl=XJQ_PictLoader()
 		self.__mask=XJQ_LoadingMask(parent=self.__pc,iconSize=(80,80))
 
@@ -36,6 +38,7 @@ class Main(QWidget):
 		self.config=self.config.copy()
 		self.config['ouiConfig']=self.__oui.config
 		self.Opt_ReloadConfig()
+		self.setWindowIcon(QIcon('Icons/Logo.png'))#设置图标
 	def Opt_SaveGIF(self):
 		'''
 			手动保存动图，将返回np.ndarray动图数据
@@ -88,18 +91,12 @@ class Main(QWidget):
 
 if True:
 	app = QApplication([])
-
-	file='2024-01-09 00-15-45.mp4'
-	# file='Clock_JE3_BE3.webp'
-	file='XJ/Widgets/icons/加载动画-7.gif'
-	# file=os.path.join('F:/文档/Videos',file)
-	# file=os.path.join('F:/文档/Videos',file)
-
+	
 	win=Main()
-	win.Opt_LoadPicts(file)
-	# win.Opt_UpdatePreview()
 	win.show()
 	win.resize(1200,800)
+	title='GIF生成器'
+	win.setWindowTitle(title)
 
 	app.exec_()
 

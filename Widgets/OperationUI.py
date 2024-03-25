@@ -33,7 +33,7 @@ class OperationUI(QWidget):
 		self.__ni_scale=XJQ_NumInput(None,0.01,1,1,0.01,0.1)#应该没人会选择主动放大的吧(而且内存占用挺严重的说实话)
 		self.__lb_duration=QLabel('帧时长(s)：')
 		self.__lb_hint=QLabel()
-		self.__lv=XJQ_PictListView()
+		self.__lv=XJQ_PictListView(loadingGIF=self.config['loadingGIF'])
 		self.__ni_duration=XJQ_NumInput(None,0.001,100,0.05,0.001,0.01)
 		self.__btn_refresh=XJQ_PureColorIconButton()
 		self.__btn_makeGIF=XJQ_PureColorIconButton()
@@ -192,7 +192,7 @@ class OperationUI(QWidget):
 			gm=XJ_GIFMaker()
 			gm.Opt_Insert(path)
 			if(self.__lv.Get_Length()==0):
-				self.__ni_duration.Set_Value(gm.duration/1000)
+				self.__ni_duration.Set_Value(gm.duration/1000 if len(gm.frames)>1 else 1)
 			self.Opt_InsertPicts(gm.frames,path,index)
 			self.__val_pictCount[0]+=len(gm.frames)
 			self.__val_pictCount[1]+=len(gm.frames)

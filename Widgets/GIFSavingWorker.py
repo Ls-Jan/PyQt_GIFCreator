@@ -9,6 +9,7 @@ from PyQt5.QtCore import pyqtSignal,QThread
 __all__=['GIFSavingWorker']
 class GIFSavingWorker(QThread):
 	updated=pyqtSignal()
+	completed=pyqtSignal(bool)#如果是强制中断的话发送的是False。(finished信号被占用，改用completed这个名称)
 	def __init__(self):
 		super().__init__()
 		self.__gm=XJ_GIFMaker()
@@ -47,18 +48,12 @@ class GIFSavingWorker(QThread):
 				self.__writtenSize=0
 				self.start()
 	def Opt_Stop(self):
-		if(self.__status==1):
-			self.__gm.Opt_StopOperation()
-		elif(self.__status==2):
-			self.__status=0
-			self.wait()
-			if(os.path.exists(self.__path)):
-				os.remove(self.__path)
+		self.__status=-1
 	def run(self):
 		self.__lastStatus=self.__status
 		time.sleep(0.5)
 		if(self.__status==1):
-			while(self.__status!=0):
+			while(self.__status==1):
 				time.sleep(0.1)
 				self.updated.emit()
 		elif(self.__status==2):
@@ -83,7 +78,12 @@ class GIFSavingWorker(QThread):
 						sizeP*=2
 					self.updated.emit()
 				file.close()
+		if(self.__status==-1):
+			self.__gm.Opt_StopOperation()
+			if(os.path.exists(self.__path)):
+				os.remove(self.__path)
+		self.completed.emit(self.__status==0)
+		self.__status=0
 	def __Action_MakeGIF_Finish(self,data):
 		self.__status=0
 		self.__data=data
-
