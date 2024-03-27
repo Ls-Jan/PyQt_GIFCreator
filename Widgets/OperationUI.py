@@ -178,26 +178,30 @@ class OperationUI(QWidget):
 			self.__val_resolution[i]=0
 			self.__val_pictCount[i]=0
 		self.__UpdateHint()
-	def Opt_LoadPicts(self,path:str=None,index:int=None):
+	def Opt_LoadPicts(self,*pathLst:str,index:int=None):
 		'''
 			加载图片资源，并将结果追加到列表中。
 			如果path不指定则会弹出文件选择窗口。
 			index为None的话则以最后一次右键图片列表时鼠标位置对应的索引为准
+
+			【新增】
+				函数不再只能加载一个文件了，可以一次性加载多个文件
 		'''
-		if(not path):
-			path=QFileDialog.getOpenFileName(None,"载入资源文件","",filter='*.png;*.jpg;*.mp4;*.gif;*.webp')[0]
+		if(not pathLst):
+			pathLst=QFileDialog.getOpenFileNames(None,"载入资源文件","",filter='*.png;*.jpg;*.mp4;*.gif;*.webp')[0]
 		if(index==None):
 			index=self.__val_clickIndex
-		if(path and os.path.exists(path)):
-			gm=XJ_GIFMaker()
-			gm.Opt_Insert(path)
-			if(self.__lv.Get_Length()==0):
-				self.__ni_duration.Set_Value(gm.duration/1000 if len(gm.frames)>1 else 1)
-			self.Opt_InsertPicts(gm.frames,path,index)
-			self.__val_pictCount[0]+=len(gm.frames)
-			self.__val_pictCount[1]+=len(gm.frames)
-			self.__UpdateHint()
-			gm.Opt_Clear()
+		for path in pathLst if index==-1 else reversed(pathLst):
+			if(os.path.exists(path)):
+				gm=XJ_GIFMaker()
+				gm.Opt_Insert(path)
+				if(self.__lv.Get_Length()==0):
+					self.__ni_duration.Set_Value(gm.duration/1000 if len(gm.frames)>1 else 1)
+				self.Opt_InsertPicts(gm.frames,path,index)
+				self.__val_pictCount[0]+=len(gm.frames)
+				self.__val_pictCount[1]+=len(gm.frames)
+				self.__UpdateHint()
+				gm.Opt_Clear()
 	def Opt_InsertPicts(self,pictLst:list,group:str,index:int=-1):
 		'''
 			将XJ_Frame列表插入到图片列表中。
@@ -206,7 +210,7 @@ class OperationUI(QWidget):
 		self.__lv.Opt_Insert(pictLst,group,index=index)
 		for size in (frame.size() for frame in pictLst):
 			for i in range(2):
-				self.__val_resolution[i]=max(self.__val_resolution[i],size[i])
+				self.__val_resolution[i]=int(max(self.__val_resolution[i],size[i]))
 		self.__UpdateHint()
 	def __UpdateHint(self):
 		'''
